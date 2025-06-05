@@ -1,0 +1,29 @@
+name: Simulate Docker Build and Push to ECR
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  simulate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Simulate AWS Credentials
+        run: |
+          echo "Using dummy AWS credentials"
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}"
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+
+      - name: Simulate Docker Build
+        run: |
+          echo "docker build -t webapp:latest ."
+          echo "docker tag webapp:latest 123456789012.dkr.ecr.us-east-1.amazonaws.com/webapp-repo:latest"
+
+      - name: Simulate Docker Push
+        run: |
+          echo "docker push 123456789012.dkr.ecr.us-east-1.amazonaws.com/webapp-repo:latest"
