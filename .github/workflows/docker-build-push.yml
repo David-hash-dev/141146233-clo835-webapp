@@ -1,0 +1,47 @@
+name: Build and Push Docker Images to ECR
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials from GitHub OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::537380924761:role/LabRole
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        run: |
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 537380924761.dkr.ecr.us-east-1.amazonaws.com
+
+      - name: Build Docker image for Web App
+        run: |
+          docker build -t webapp-repo .
+
+      - name: Tag and push Web App image
+        run: |
+          docker tag webapp-repo:latest 537380924761.dkr.ecr.us-east-1.amazonaws.com/webapp-repo:latest
+          docker push 537380924761.dkr.ecr.us-east-1.amazonaws.com/webapp-repo:latest
+
+      - name: Build Docker image for MySQL
+        run: |
+          docker build -t mysql-repo -f Dockerfile_mysql .
+
+      - name: Tag and push MySQL image
+        run: |
+          docker tag mysql-repo:latest 537380924761.dkr.ecr.us-east-1.amazonaws.com/mysql-repo:latest
+          docker push 537380924761.dkr.ecr.us-east-1.amazonaws.com/mysql-repo:latest
+
